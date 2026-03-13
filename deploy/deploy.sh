@@ -49,6 +49,9 @@ LOG_FILE="${LOG_FILE:-/var/log/namecheap-dynamicdns/updater.log}"
 install -d -m 750 -o "$APP_USER" -g "$APP_GROUP" "$(dirname "$CACHE_FILE")"
 install -d -m 750 -o "$APP_USER" -g "$APP_GROUP" "$(dirname "$STATUS_FILE")"
 install -d -m 750 -o "$APP_USER" -g "$APP_GROUP" "$(dirname "$LOG_FILE")"
+touch "$CACHE_FILE" "$STATUS_FILE" "$LOG_FILE"
+chown "$APP_USER":"$APP_GROUP" "$CACHE_FILE" "$STATUS_FILE" "$LOG_FILE"
+chmod 640 "$CACHE_FILE" "$STATUS_FILE" "$LOG_FILE"
 
 required_vars=(NAMECHEAP_DOMAIN NAMECHEAP_HOST NAMECHEAP_DDNS_PASSWORD)
 for required_var in "${required_vars[@]}"; do
