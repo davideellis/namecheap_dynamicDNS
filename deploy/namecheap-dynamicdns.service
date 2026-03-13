@@ -6,8 +6,22 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/opt/namecheap_dynamicDNS
-EnvironmentFile=/opt/namecheap_dynamicDNS/.env
+EnvironmentFile=/etc/namecheap-dynamicdns/namecheap-dynamicdns.env
 ExecStart=/opt/namecheap_dynamicDNS/.venv/bin/namecheap-dynamicdns
-User=root
-Group=root
-
+User=namecheap-ddns
+Group=namecheap-ddns
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectControlGroups=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SystemCallArchitectures=native
+StateDirectory=namecheap-dynamicdns
+LogsDirectory=namecheap-dynamicdns

@@ -16,6 +16,8 @@ class Settings:
     log_level: str
     log_file: Path | None
     ip_discovery_timeout_seconds: int
+    cache_file: Path
+    status_file: Path
 
 
 def load_settings() -> Settings:
@@ -36,6 +38,8 @@ def load_settings() -> Settings:
         log_level=os.getenv("LOG_LEVEL", "INFO").strip().upper(),
         log_file=log_file,
         ip_discovery_timeout_seconds=_int_env("IP_DISCOVERY_TIMEOUT_SECONDS", 10),
+        cache_file=Path(os.getenv("CACHE_FILE", "/var/lib/namecheap-dynamicdns/last_ip.txt").strip()),
+        status_file=Path(os.getenv("STATUS_FILE", "/var/lib/namecheap-dynamicdns/status.json").strip()),
     )
 
 
@@ -55,4 +59,3 @@ def _int_env(name: str, default: int) -> int:
         return int(raw_value)
     except ValueError as exc:
         raise ValueError(f"Environment variable {name} must be an integer.") from exc
-

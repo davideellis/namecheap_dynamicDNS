@@ -15,6 +15,8 @@ def test_load_settings_reads_required_and_optional_values(monkeypatch: pytest.Mo
     monkeypatch.setenv("LOG_LEVEL", "debug")
     monkeypatch.setenv("LOG_FILE", "/tmp/updater.log")
     monkeypatch.setenv("IP_DISCOVERY_TIMEOUT_SECONDS", "15")
+    monkeypatch.setenv("CACHE_FILE", "/tmp/last_ip.txt")
+    monkeypatch.setenv("STATUS_FILE", "/tmp/status.json")
 
     settings = load_settings()
 
@@ -26,6 +28,8 @@ def test_load_settings_reads_required_and_optional_values(monkeypatch: pytest.Mo
         log_level="DEBUG",
         log_file=Path("/tmp/updater.log"),
         ip_discovery_timeout_seconds=15,
+        cache_file=Path("/tmp/last_ip.txt"),
+        status_file=Path("/tmp/status.json"),
     )
 
 
@@ -39,6 +43,8 @@ def test_load_settings_defaults_blank_host_to_root(monkeypatch: pytest.MonkeyPat
 
     assert settings.host == "@"
     assert settings.log_file is None
+    assert settings.cache_file == Path("/var/lib/namecheap-dynamicdns/last_ip.txt")
+    assert settings.status_file == Path("/var/lib/namecheap-dynamicdns/status.json")
 
 
 def test_load_settings_requires_domain(monkeypatch: pytest.MonkeyPatch) -> None:

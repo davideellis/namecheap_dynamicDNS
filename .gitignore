@@ -1,4 +1,5 @@
 .env
+.codex_tmp/
 .venv/
 __pycache__/
 .pytest_cache/
@@ -8,4 +9,3 @@ __pycache__/
 dist/
 build/
 *.egg-info/
-
