@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Namecheap Dynamic DNS updater every 5 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Unit=namecheap-dynamicdns.service
+
+[Install]
+WantedBy=timers.target
+

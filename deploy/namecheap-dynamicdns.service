@@ -1,0 +1,13 @@
+[Unit]
+Description=Namecheap Dynamic DNS updater
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/namecheap_dynamicDNS
+EnvironmentFile=/opt/namecheap_dynamicDNS/.env
+ExecStart=/opt/namecheap_dynamicDNS/.venv/bin/namecheap-dynamicdns
+User=root
+Group=root
+
