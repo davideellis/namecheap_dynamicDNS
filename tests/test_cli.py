@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from tempfile import gettempdir
 from unittest.mock import patch
 
 from namecheap_dynamicdns.cli import _print_status, _run_once, main
@@ -10,8 +9,8 @@ from namecheap_dynamicdns.ip_lookup import PublicIpLookupError
 from namecheap_dynamicdns.namecheap import UpdateResult
 
 
-def _settings() -> Settings:
-    temp_dir = Path(gettempdir()) / "namecheap-dynamicdns-tests"
+def _settings(tmp_path: Path) -> Settings:
+    temp_dir = tmp_path / "runtime"
     return Settings(
         domain="example.com",
         host="@",
@@ -33,7 +32,8 @@ def test_main_returns_error_when_config_is_invalid() -> None:
 
 
 def test_main_runs_once_successfully() -> None:
-    with patch("namecheap_dynamicdns.cli.load_settings", return_value=_settings()), patch(
+    settings = _settings(Path.cwd())
+    with patch("namecheap_dynamicdns.cli.load_settings", return_value=settings), patch(
         "namecheap_dynamicdns.cli.configure_logging"
     ), patch("namecheap_dynamicdns.cli._run_once", return_value=0) as run_once, patch(
         "sys.argv", ["namecheap-dynamicdns"]
@@ -43,7 +43,8 @@ def test_main_runs_once_successfully() -> None:
 
 
 def test_main_runs_forever_mode_when_requested() -> None:
-    with patch("namecheap_dynamicdns.cli.load_settings", return_value=_settings()), patch(
+    settings = _settings(Path.cwd())
+    with patch("namecheap_dynamicdns.cli.load_settings", return_value=settings), patch(
         "namecheap_dynamicdns.cli.configure_logging"
     ), patch("namecheap_dynamicdns.cli._run_forever", return_value=0) as run_forever, patch(
         "sys.argv", ["namecheap-dynamicdns", "--loop"]
@@ -52,25 +53,25 @@ def test_main_runs_forever_mode_when_requested() -> None:
         run_forever.assert_called_once()
 
 
-def test_run_once_updates_record_successfully() -> None:
+def test_run_once_updates_record_successfully(tmp_path: Path) -> None:
     with patch("namecheap_dynamicdns.cli.discover_public_ip", return_value="203.0.113.20"), patch(
         "namecheap_dynamicdns.cli.update_a_record",
         return_value=UpdateResult(ip="203.0.113.20", success=True, error_count=0),
     ) as update_record:
-        assert _run_once(_settings()) == 0
+        assert _run_once(_settings(tmp_path)) == 0
         update_record.assert_called_once()
 
 
-def test_run_once_skips_update_when_ip_is_unchanged() -> None:
+def test_run_once_skips_update_when_ip_is_unchanged(tmp_path: Path) -> None:
     with patch("namecheap_dynamicdns.cli.discover_public_ip", return_value="203.0.113.20"), patch(
         "namecheap_dynamicdns.cli.read_cached_ip",
         return_value="203.0.113.20",
     ), patch("namecheap_dynamicdns.cli.update_a_record") as update_record:
-        assert _run_once(_settings()) == 0
+        assert _run_once(_settings(tmp_path)) == 0
         update_record.assert_not_called()
 
 
-def test_run_once_force_update_bypasses_cache() -> None:
+def test_run_once_force_update_bypasses_cache(tmp_path: Path) -> None:
     with patch("namecheap_dynamicdns.cli.discover_public_ip", return_value="203.0.113.20"), patch(
         "namecheap_dynamicdns.cli.read_cached_ip",
         return_value="203.0.113.20",
@@ -78,18 +79,18 @@ def test_run_once_force_update_bypasses_cache() -> None:
         "namecheap_dynamicdns.cli.update_a_record",
         return_value=UpdateResult(ip="203.0.113.20", success=True, error_count=0),
     ) as update_record:
-        assert _run_once(_settings(), force_update=True) == 0
+        assert _run_once(_settings(tmp_path), force_update=True) == 0
         update_record.assert_called_once()
 
 
-def test_run_once_returns_error_on_lookup_failure() -> None:
+def test_run_once_returns_error_on_lookup_failure(tmp_path: Path) -> None:
     with patch(
         "namecheap_dynamicdns.cli.discover_public_ip",
         side_effect=PublicIpLookupError("lookup failed"),
     ):
-        assert _run_once(_settings()) == 1
+        assert _run_once(_settings(tmp_path)) == 1
 
 
-def test_print_status_returns_error_when_missing() -> None:
+def test_print_status_returns_error_when_missing(tmp_path: Path) -> None:
     with patch("namecheap_dynamicdns.cli.read_status", return_value=None):
-        assert _print_status(_settings()) == 1
+        assert _print_status(_settings(tmp_path)) == 1

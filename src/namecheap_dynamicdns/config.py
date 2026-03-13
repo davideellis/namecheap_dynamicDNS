@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 
 @dataclass(frozen=True)
@@ -21,7 +21,9 @@ class Settings:
 
 
 def load_settings() -> Settings:
-    load_dotenv()
+    dotenv_path = find_dotenv(usecwd=True)
+    if dotenv_path and os.access(dotenv_path, os.R_OK):
+        load_dotenv(dotenv_path=dotenv_path)
 
     domain = _required_env("NAMECHEAP_DOMAIN")
     host = os.getenv("NAMECHEAP_HOST", "@").strip() or "@"
